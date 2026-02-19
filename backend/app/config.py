@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     celery_result_backend: str = "redis://localhost:6379/2"
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = ["http://localhost:3000", "https://tne.badev.tools", "https://tne-api.badev.tools"]
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
