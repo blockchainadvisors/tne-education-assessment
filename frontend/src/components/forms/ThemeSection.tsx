@@ -36,7 +36,7 @@ export function ThemeSection({
                   {item.code}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label className="label">
+                  <label htmlFor={`field-${item.id}`} className="label">
                     {item.label}
                     {item.validation?.required && (
                       <span className="ml-1 text-red-500">*</span>
@@ -61,6 +61,7 @@ export function ThemeSection({
                 value={value}
                 onChange={(val) => onFieldChange(item.id, val)}
                 disabled={disabled}
+                id={`field-${item.id}`}
               />
             </div>
           </div>

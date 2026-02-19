@@ -7,13 +7,15 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
-export function NumericField({ item, value, onChange, disabled }: Props) {
+export function NumericField({ item, value, onChange, disabled, id }: Props) {
   const numValue = value !== undefined && value !== null && value !== "" ? Number(value) : "";
 
   return (
     <input
+      id={id}
       type="number"
       value={numValue}
       onChange={(e) => {

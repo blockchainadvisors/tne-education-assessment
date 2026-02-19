@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { Badge } from "@/components/ui";
 import type { Report } from "@/lib/types";
 
 interface ReportViewerProps {
@@ -40,8 +41,8 @@ export function ReportViewer({ report }: ReportViewerProps) {
       {/* Report header */}
       <div className="card">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-indigo-100 p-2">
-            <FileText className="h-5 w-5 text-indigo-600" />
+          <div className="rounded-lg bg-brand-100 p-2">
+            <FileText className="h-5 w-5 text-brand-600" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-slate-900">
@@ -55,24 +56,24 @@ export function ReportViewer({ report }: ReportViewerProps) {
                 year: "numeric",
               })}
             </p>
-            <span className="mt-2 inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+            <Badge variant="default" size="sm" className="mt-2">
               {report.report_type
                 .split("_")
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
                 .join(" ")}
-            </span>
+            </Badge>
           </div>
           <div className="flex gap-2">
             <button
               onClick={expandAll}
-              className="text-xs text-indigo-600 hover:text-indigo-500"
+              className="btn-ghost btn-sm text-brand-600"
             >
               Expand all
             </button>
             <span className="text-slate-300">|</span>
             <button
               onClick={collapseAll}
-              className="text-xs text-indigo-600 hover:text-indigo-500"
+              className="btn-ghost btn-sm text-brand-600"
             >
               Collapse all
             </button>
@@ -88,6 +89,7 @@ export function ReportViewer({ report }: ReportViewerProps) {
             <button
               onClick={() => toggleSection(idx)}
               className="flex w-full items-center gap-3 px-6 py-4 text-left transition-colors hover:bg-slate-50"
+              aria-expanded={isExpanded}
             >
               {isExpanded ? (
                 <ChevronDown className="h-5 w-5 shrink-0 text-slate-400" />

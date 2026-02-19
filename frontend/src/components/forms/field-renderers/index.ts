@@ -17,6 +17,7 @@ export type FieldRendererProps = {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 };
 
 type FieldRendererComponent = React.ComponentType<FieldRendererProps>;

@@ -8,6 +8,7 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
 interface SalaryBand {
@@ -25,7 +26,7 @@ const DEFAULT_BANDS = [
   "Teaching Assistant",
 ];
 
-export function SalaryBandsField({ item, value, onChange, disabled }: Props) {
+export function SalaryBandsField({ item, value, onChange, disabled, id }: Props) {
   const bands = item.options?.map((o) => o.value) || DEFAULT_BANDS;
 
   const salaryData: SalaryBand[] = useMemo(() => {
@@ -54,7 +55,7 @@ export function SalaryBandsField({ item, value, onChange, disabled }: Props) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div id={id} className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
@@ -85,7 +86,7 @@ export function SalaryBandsField({ item, value, onChange, disabled }: Props) {
                   value={row.min ?? ""}
                   onChange={(e) => handleChange(idx, "min", e.target.value)}
                   disabled={disabled}
-                  className="w-28 rounded border border-slate-200 px-2 py-1 text-center text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                  className="input-field-compact w-28"
                   placeholder="0"
                 />
               </td>
@@ -96,7 +97,7 @@ export function SalaryBandsField({ item, value, onChange, disabled }: Props) {
                   value={row.max ?? ""}
                   onChange={(e) => handleChange(idx, "max", e.target.value)}
                   disabled={disabled}
-                  className="w-28 rounded border border-slate-200 px-2 py-1 text-center text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                  className="input-field-compact w-28"
                   placeholder="0"
                 />
               </td>
@@ -107,7 +108,7 @@ export function SalaryBandsField({ item, value, onChange, disabled }: Props) {
                   value={row.median ?? ""}
                   onChange={(e) => handleChange(idx, "median", e.target.value)}
                   disabled={disabled}
-                  className="w-28 rounded border border-slate-200 px-2 py-1 text-center text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                  className="input-field-compact w-28"
                   placeholder="0"
                 />
               </td>

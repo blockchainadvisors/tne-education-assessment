@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import type { TokenResponse } from "@/lib/types";
+import { Spinner } from "@/components/ui";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -44,7 +46,56 @@ export default function VerifyEmailPage() {
   }, [token, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4">
+    <div className="card text-center">
+      {status === "verifying" && (
+        <>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+          <h2 className="mb-2 text-xl font-semibold text-slate-900">
+            Verifying your email...
+          </h2>
+          <p className="text-sm text-slate-600">
+            Please wait while we verify your email address.
+          </p>
+        </>
+      )}
+
+      {status === "success" && (
+        <>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+          </div>
+          <h2 className="mb-2 text-xl font-semibold text-slate-900">
+            Email verified!
+          </h2>
+          <p className="text-sm text-slate-600">
+            Redirecting you to the dashboard...
+          </p>
+        </>
+      )}
+
+      {status === "error" && (
+        <>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <XCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <h2 className="mb-2 text-xl font-semibold text-slate-900">
+            Verification failed
+          </h2>
+          <p className="mb-6 text-sm text-red-600">{error}</p>
+          <Link href="/login" className="btn-primary inline-block">
+            Back to sign in
+          </Link>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-blue-50 px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
@@ -52,92 +103,15 @@ export default function VerifyEmailPage() {
           </h1>
         </div>
 
-        <div className="card text-center">
-          {status === "verifying" && (
-            <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
-                <svg
-                  className="h-10 w-10 animate-spin text-indigo-600"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-              </div>
-              <h2 className="mb-2 text-xl font-semibold text-slate-900">
-                Verifying your email...
-              </h2>
-              <p className="text-sm text-slate-600">
-                Please wait while we verify your email address.
-              </p>
-            </>
-          )}
-
-          {status === "success" && (
-            <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                <svg
-                  className="h-8 w-8 text-green-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.5 12.75l6 6 9-13.5"
-                  />
-                </svg>
-              </div>
-              <h2 className="mb-2 text-xl font-semibold text-slate-900">
-                Email verified!
-              </h2>
-              <p className="text-sm text-slate-600">
-                Redirecting you to the dashboard...
-              </p>
-            </>
-          )}
-
-          {status === "error" && (
-            <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-                <svg
-                  className="h-8 w-8 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </div>
-              <h2 className="mb-2 text-xl font-semibold text-slate-900">
-                Verification failed
-              </h2>
-              <p className="mb-6 text-sm text-red-600">{error}</p>
-              <Link href="/login" className="btn-primary inline-block">
-                Back to sign in
-              </Link>
-            </>
-          )}
-        </div>
+        <Suspense
+          fallback={
+            <div className="card flex items-center justify-center py-12">
+              <Spinner size="lg" />
+            </div>
+          }
+        >
+          <VerifyEmailContent />
+        </Suspense>
       </div>
     </div>
   );

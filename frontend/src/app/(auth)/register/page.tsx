@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import type { MessageResponse } from "@/lib/types";
+import { Spinner, Alert } from "@/components/ui";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-blue-50 px-4 py-12">
       <div className="w-full max-w-lg">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
@@ -72,9 +73,9 @@ export default function RegisterPage() {
           </h2>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <Alert variant="error" className="mb-4">
               {error}
-            </div>
+            </Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -183,25 +184,7 @@ export default function RegisterPage() {
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
+                  <Spinner size="sm" className="text-white" />
                   Creating account...
                 </span>
               ) : (
@@ -214,7 +197,7 @@ export default function RegisterPage() {
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
+              className="font-semibold text-brand-600 hover:text-brand-500"
             >
               Sign in
             </Link>

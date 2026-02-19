@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui";
 import { apiClient } from "@/lib/api-client";
 import type { AssessmentScores } from "@/lib/types";
 import { RadarChart } from "./RadarChart";
@@ -22,7 +22,7 @@ export function ScoreOverview({ assessmentId }: ScoreOverviewProps) {
   if (isLoading) {
     return (
       <div className="card flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+        <Spinner />
       </div>
     );
   }
@@ -36,7 +36,7 @@ export function ScoreOverview({ assessmentId }: ScoreOverviewProps) {
       {/* Score gauge */}
       <div className="card flex flex-col items-center justify-center py-8">
         <div className="relative flex h-40 w-40 items-center justify-center">
-          <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
+          <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120" role="img" aria-label={`Overall score: ${scores.overall_percentage.toFixed(0)}%`}>
             {/* Background circle */}
             <circle
               cx="60"
@@ -52,7 +52,7 @@ export function ScoreOverview({ assessmentId }: ScoreOverviewProps) {
               cy="60"
               r="50"
               fill="none"
-              stroke="#4f46e5"
+              stroke="var(--brand)"
               strokeWidth="10"
               strokeLinecap="round"
               strokeDasharray={`${(scores.overall_percentage / 100) * 314} 314`}

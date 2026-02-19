@@ -7,6 +7,7 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
 interface YesNoValue {
@@ -19,6 +20,7 @@ export function YesNoConditionalField({
   value,
   onChange,
   disabled,
+  id,
 }: Props) {
   const currentValue: YesNoValue =
     typeof value === "object" && value !== null
@@ -38,12 +40,13 @@ export function YesNoConditionalField({
   }
 
   return (
-    <div className="space-y-3">
+    <div id={id} className="space-y-3">
       <div className="flex gap-3">
         <button
           type="button"
           onClick={() => handleToggle(true)}
           disabled={disabled}
+          aria-pressed={currentValue.answer === true}
           className={`rounded-lg px-6 py-2 text-sm font-medium transition-colors ${
             currentValue.answer === true
               ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300"
@@ -56,6 +59,7 @@ export function YesNoConditionalField({
           type="button"
           onClick={() => handleToggle(false)}
           disabled={disabled}
+          aria-pressed={currentValue.answer === false}
           className={`rounded-lg px-6 py-2 text-sm font-medium transition-colors ${
             currentValue.answer === false
               ? "bg-red-100 text-red-700 ring-1 ring-red-300"
@@ -67,7 +71,7 @@ export function YesNoConditionalField({
       </div>
 
       {currentValue.answer === true && (
-        <div className="ml-0 border-l-2 border-indigo-200 pl-4">
+        <div className="ml-0 border-l-2 border-brand-200 pl-4">
           <label className="mb-1 block text-xs font-medium text-slate-600">
             Please provide details
           </label>

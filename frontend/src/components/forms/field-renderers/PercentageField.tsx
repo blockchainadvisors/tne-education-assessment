@@ -7,14 +7,16 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
-export function PercentageField({ item, value, onChange, disabled }: Props) {
+export function PercentageField({ item, value, onChange, disabled, id }: Props) {
   const numValue = value !== undefined && value !== null && value !== "" ? Number(value) : "";
 
   return (
     <div className="relative max-w-xs">
       <input
+        id={id}
         type="number"
         value={numValue}
         onChange={(e) => {

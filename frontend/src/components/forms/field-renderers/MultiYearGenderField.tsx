@@ -9,6 +9,7 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
 type GridData = Record<string, Record<string, number>>;
@@ -21,6 +22,7 @@ export function MultiYearGenderField({
   value,
   onChange,
   disabled,
+  id,
 }: Props) {
   const years =
     item.options?.map((o) => o.value) || DEFAULT_YEARS;
@@ -53,7 +55,7 @@ export function MultiYearGenderField({
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div id={id} className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
@@ -89,7 +91,7 @@ export function MultiYearGenderField({
                       handleCellChange(gender, year, e.target.value)
                     }
                     disabled={disabled}
-                    className="w-20 rounded border border-slate-200 px-2 py-1 text-center text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    className="input-field-compact w-20"
                   />
                 </td>
               ))}
@@ -109,7 +111,7 @@ export function MultiYearGenderField({
                 {colTotals[year] || 0}
               </td>
             ))}
-            <td className="px-3 py-2 text-center font-bold text-indigo-600">
+            <td className="px-3 py-2 text-center font-bold text-brand-600">
               {grandTotal}
             </td>
           </tr>

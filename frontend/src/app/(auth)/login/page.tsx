@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import type { MessageResponse, TokenResponse } from "@/lib/types";
+import { Spinner, Alert } from "@/components/ui";
 
 type Tab = "password" | "magic-link";
 
@@ -71,7 +72,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-blue-50 px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
@@ -122,15 +123,15 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <Alert variant="error" className="mb-4">
               {error}
-            </div>
+            </Alert>
           )}
 
           {message && (
-            <div className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+            <Alert variant="success" className="mb-4">
               {message}
-            </div>
+            </Alert>
           )}
 
           {tab === "password" ? (
@@ -174,25 +175,7 @@ export default function LoginPage() {
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
-                    <svg
-                      className="h-4 w-4 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
+                    <Spinner size="sm" className="text-white" />
                     Signing in...
                   </span>
                 ) : (
@@ -230,25 +213,7 @@ export default function LoginPage() {
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
-                    <svg
-                      className="h-4 w-4 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
+                    <Spinner size="sm" className="text-white" />
                     Sending link...
                   </span>
                 ) : (
@@ -262,7 +227,7 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
+              className="font-semibold text-brand-600 hover:text-brand-500"
             >
               Register your institution
             </Link>

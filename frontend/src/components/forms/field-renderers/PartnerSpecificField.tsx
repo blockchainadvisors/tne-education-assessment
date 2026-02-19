@@ -8,6 +8,7 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
 type PartnerData = Record<string, Record<string, unknown>>;
@@ -17,6 +18,7 @@ export function PartnerSpecificField({
   value,
   onChange,
   disabled,
+  id,
 }: Props) {
   const partners = item.options || [];
   const subFields = item.sub_fields || [];
@@ -56,7 +58,7 @@ export function PartnerSpecificField({
   }
 
   return (
-    <div className="space-y-4">
+    <div id={id} className="space-y-4">
       {partners.map((partner) => (
         <div
           key={partner.value}

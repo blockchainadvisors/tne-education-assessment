@@ -5,12 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Loader2,
   Save,
   CheckCircle2,
   Send,
   AlertCircle,
 } from "lucide-react";
+import { Spinner, ConfirmDialog } from "@/components/ui";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { AssessmentForm } from "@/components/forms/AssessmentForm";
@@ -39,6 +39,7 @@ export default function AssessmentEditPage() {
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [submitting, setSubmitting] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   // Build a map of item_id -> value from saved responses + pending changes
   const responseMap = useMemo(() => {
@@ -112,7 +113,7 @@ export default function AssessmentEditPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -158,7 +159,7 @@ export default function AssessmentEditPage() {
           <span className="flex items-center gap-1.5 text-sm">
             {saveStatus === "saving" && (
               <>
-                <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                <Spinner size="sm" className="text-slate-400" />
                 <span className="text-slate-500">Saving...</span>
               </>
             )}
@@ -189,13 +190,13 @@ export default function AssessmentEditPage() {
           </button>
 
           <button
-            onClick={handleSubmit}
+            onClick={() => setShowSubmitConfirm(true)}
             disabled={submitting}
             className="btn-primary"
           >
             {submitting ? (
               <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner size="sm" className="text-white" />
                 Submitting...
               </span>
             ) : (
@@ -219,7 +220,7 @@ export default function AssessmentEditPage() {
         </div>
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
           <div
-            className="h-full rounded-full bg-indigo-600 transition-all duration-300"
+            className="h-full rounded-full bg-brand-600 transition-all duration-300"
             style={{ width: `${progress.percentage}%` }}
           />
         </div>
@@ -246,7 +247,7 @@ export default function AssessmentEditPage() {
                   onClick={() => setActiveThemeIndex(idx)}
                   className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                     idx === activeThemeIndex
-                      ? "bg-indigo-50 font-semibold text-indigo-700"
+                      ? "bg-brand-50 font-semibold text-brand-700"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
@@ -273,11 +274,18 @@ export default function AssessmentEditPage() {
             onChange={(e) => setActiveThemeIndex(Number(e.target.value))}
             className="input-field"
           >
-            {themes.map((theme, idx) => (
-              <option key={theme.id} value={idx}>
-                {theme.name}
-              </option>
-            ))}
+            {themes.map((theme, idx) => {
+              const themeItems = theme.items;
+              const themeCompleted = themeItems.filter((item) => {
+                const val = responseMap[item.id];
+                return val !== undefined && val !== null && val !== "";
+              }).length;
+              return (
+                <option key={theme.id} value={idx}>
+                  {theme.name} ({themeCompleted}/{themeItems.length})
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -296,6 +304,19 @@ export default function AssessmentEditPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showSubmitConfirm}
+        onConfirm={() => {
+          setShowSubmitConfirm(false);
+          handleSubmit();
+        }}
+        onCancel={() => setShowSubmitConfirm(false)}
+        title="Submit Assessment"
+        description="Are you sure you want to submit this assessment? Once submitted, you won't be able to edit your responses."
+        confirmLabel="Submit Assessment"
+        variant="default"
+      />
     </div>
   );
 }

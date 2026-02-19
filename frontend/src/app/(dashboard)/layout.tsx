@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import type { User } from "@/lib/types";
+import { Spinner, Badge } from "@/components/ui";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -43,7 +44,7 @@ export default function DashboardLayout({
     }
 
     apiClient
-      .get<User>("/auth/me")
+      .get<User>("/users/me")
       .then(setUser)
       .catch(() => {
         apiClient.clearTokens();
@@ -61,25 +62,7 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <svg
-            className="h-8 w-8 animate-spin text-indigo-600"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
+          <Spinner size="lg" />
           <span className="text-sm text-slate-500">Loading...</span>
         </div>
       </div>
@@ -88,6 +71,14 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Skip to content */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-brand-600 focus:shadow-lg focus:ring-2 focus:ring-brand-600"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -101,10 +92,13 @@ export default function DashboardLayout({
         className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-slate-900 transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        role={sidebarOpen ? "dialog" : undefined}
+        aria-modal={sidebarOpen ? "true" : undefined}
+        aria-label="Navigation sidebar"
       >
         <div className="flex h-16 items-center justify-between px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
               T
             </div>
             <span className="text-lg font-semibold text-white">
@@ -114,6 +108,7 @@ export default function DashboardLayout({
           <button
             onClick={() => setSidebarOpen(false)}
             className="text-slate-400 hover:text-white lg:hidden"
+            aria-label="Close navigation"
           >
             <X className="h-5 w-5" />
           </button>
@@ -130,7 +125,14 @@ export default function DashboardLayout({
         )}
 
         <nav className="space-y-1 px-3">
-          {navigation.map((item) => {
+          {navigation
+            .filter((item) => {
+              if (item.href === "/admin") {
+                return user?.role === "super_admin" || user?.role === "tenant_admin";
+              }
+              return true;
+            })
+            .map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link
@@ -138,10 +140,11 @@ export default function DashboardLayout({
                 href={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-brand-600 text-white"
                     : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
                 onClick={() => setSidebarOpen(false)}
+                aria-current={isActive ? "page" : undefined}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
                 {item.name}
@@ -158,6 +161,7 @@ export default function DashboardLayout({
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-slate-600 hover:text-slate-900 lg:hidden"
+            aria-label="Open navigation"
           >
             <Menu className="h-6 w-6" />
           </button>
@@ -174,8 +178,10 @@ export default function DashboardLayout({
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+              aria-expanded={userMenuOpen}
+              aria-haspopup="true"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-600">
                 {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <span className="hidden font-medium sm:block">
@@ -198,9 +204,9 @@ export default function DashboardLayout({
                     <p className="truncate text-xs text-slate-500">
                       {user?.email}
                     </p>
-                    <span className="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                    <Badge variant="brand" className="mt-1">
                       {user?.role?.replace("_", " ")}
-                    </span>
+                    </Badge>
                   </div>
                   <button
                     onClick={handleLogout}
@@ -216,7 +222,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-8">{children}</main>
+        <main id="main-content" className="p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );

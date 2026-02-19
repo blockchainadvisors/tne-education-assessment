@@ -3,7 +3,8 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, AlertCircle, Download } from "lucide-react";
+import { ArrowLeft, AlertCircle, Download } from "lucide-react";
+import { Spinner, Alert, Badge } from "@/components/ui";
 import { apiClient } from "@/lib/api-client";
 import type {
   Assessment,
@@ -52,7 +53,7 @@ export default function AssessmentReviewPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -95,7 +96,7 @@ export default function AssessmentReviewPage() {
             Read-only review of submitted responses
           </p>
         </div>
-        <button className="btn-secondary">
+        <button className="btn-secondary" disabled title="PDF export coming soon">
           <Download className="mr-1.5 h-4 w-4" />
           Export PDF
         </button>
@@ -103,14 +104,14 @@ export default function AssessmentReviewPage() {
 
       {/* Scores summary */}
       {scores && (
-        <div className="card bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div className="card bg-gradient-to-r from-brand-50 to-blue-50">
           <h2 className="text-lg font-semibold text-slate-900">
             Assessment Scores
           </h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-white p-4 shadow-sm">
               <p className="text-sm text-slate-600">Overall Score</p>
-              <p className="text-3xl font-bold text-indigo-600">
+              <p className="text-3xl font-bold text-brand-600">
                 {scores.overall_percentage.toFixed(1)}%
               </p>
               <p className="text-xs text-slate-500">
@@ -163,9 +164,9 @@ export default function AssessmentReviewPage() {
                         </p>
                       )}
                     </div>
-                    <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
-                      {item.field_type.replace("_", " ")}
-                    </span>
+                    <Badge variant="default" className="shrink-0">
+                      {item.field_type.replace(/_/g, " ")}
+                    </Badge>
                   </div>
                   <div className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
                     {value !== undefined && value !== null && value !== "" ? (

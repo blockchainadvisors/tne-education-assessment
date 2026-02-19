@@ -43,8 +43,8 @@ export function RadarChart({ themeScores }: RadarChartProps) {
           <Radar
             name="Score"
             dataKey="score"
-            stroke="#4f46e5"
-            fill="#4f46e5"
+            stroke="var(--brand)"
+            fill="var(--brand)"
             fillOpacity={0.2}
             strokeWidth={2}
           />

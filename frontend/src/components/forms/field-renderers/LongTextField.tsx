@@ -7,15 +7,17 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
-export function LongTextField({ item, value, onChange, disabled }: Props) {
+export function LongTextField({ item, value, onChange, disabled, id }: Props) {
   const stringValue = (value as string) || "";
   const maxLength = item.validation?.max_length || 2000;
 
   return (
     <div>
       <textarea
+        id={id}
         value={stringValue}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}

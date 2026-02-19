@@ -1,14 +1,16 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Upload, X, FileText, Loader2 } from "lucide-react";
+import { Upload, X, FileText } from "lucide-react";
 import type { Item } from "@/lib/types";
+import { Spinner } from "@/components/ui";
 
 interface Props {
   item: Item;
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
 interface FileInfo {
@@ -17,7 +19,7 @@ interface FileInfo {
   file_size?: number;
 }
 
-export function FileUploadField({ item, value, onChange, disabled }: Props) {
+export function FileUploadField({ item, value, onChange, disabled, id }: Props) {
   const files: FileInfo[] = Array.isArray(value) ? value : [];
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -73,12 +75,22 @@ export function FileUploadField({ item, value, onChange, disabled }: Props) {
     <div className="space-y-3">
       {/* Drop zone */}
       <div
+        id={id}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        tabIndex={disabled ? -1 : 0}
+        role="button"
+        aria-label="Upload files"
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            document.getElementById(`file-input-${item.id}`)?.click();
+          }
+        }}
         className={`flex flex-col items-center rounded-lg border-2 border-dashed px-6 py-8 transition-colors ${
           isDragging
-            ? "border-indigo-400 bg-indigo-50"
+            ? "border-brand-400 bg-brand-50"
             : "border-slate-300 hover:border-slate-400"
         } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
         onClick={() => {
@@ -88,7 +100,7 @@ export function FileUploadField({ item, value, onChange, disabled }: Props) {
         }}
       >
         {uploading ? (
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Spinner size="lg" className="text-brand-500" />
         ) : (
           <Upload className="h-8 w-8 text-slate-400" />
         )}

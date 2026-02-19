@@ -7,13 +7,15 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
-export function ShortTextField({ item, value, onChange, disabled }: Props) {
+export function ShortTextField({ item, value, onChange, disabled, id }: Props) {
   const stringValue = (value as string) || "";
 
   return (
     <input
+      id={id}
       type="text"
       value={stringValue}
       onChange={(e) => onChange(e.target.value)}

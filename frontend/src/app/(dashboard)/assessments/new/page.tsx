@@ -3,9 +3,10 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import { Spinner, Alert } from "@/components/ui";
 import type { AssessmentTemplate, Assessment } from "@/lib/types";
 
 export default function NewAssessmentPage() {
@@ -62,9 +63,9 @@ export default function NewAssessmentPage() {
 
       <div className="card">
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <Alert variant="error" className="mb-4">
             {error}
-          </div>
+          </Alert>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -74,7 +75,7 @@ export default function NewAssessmentPage() {
             </label>
             {loadingTemplates ? (
               <div className="mt-1.5 flex items-center gap-2 text-sm text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner size="sm" />
                 Loading templates...
               </div>
             ) : (
@@ -121,15 +122,15 @@ export default function NewAssessmentPage() {
           </div>
 
           {templateId && templates && (
-            <div className="rounded-lg bg-indigo-50 px-4 py-3">
-              <p className="text-sm font-medium text-indigo-900">
+            <div className="rounded-lg bg-brand-50 px-4 py-3">
+              <p className="text-sm font-medium text-brand-900">
                 Template details
               </p>
               {(() => {
                 const selected = templates.find((t) => t.id === templateId);
                 if (!selected) return null;
                 return (
-                  <div className="mt-1 text-sm text-indigo-700">
+                  <div className="mt-1 text-sm text-brand-700">
                     <p>{selected.description || "No description available."}</p>
                     <p className="mt-1">
                       {selected.themes.length} themes with a total of{" "}
@@ -153,7 +154,7 @@ export default function NewAssessmentPage() {
             >
               {creating ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Spinner size="sm" className="text-white" />
                   Creating...
                 </span>
               ) : (

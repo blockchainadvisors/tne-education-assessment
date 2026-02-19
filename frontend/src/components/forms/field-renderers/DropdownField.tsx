@@ -7,13 +7,15 @@ interface Props {
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  id?: string;
 }
 
-export function DropdownField({ item, value, onChange, disabled }: Props) {
+export function DropdownField({ item, value, onChange, disabled, id }: Props) {
   const stringValue = (value as string) || "";
 
   return (
     <select
+      id={id}
       value={stringValue}
       onChange={(e) => onChange(e.target.value || null)}
       disabled={disabled}
