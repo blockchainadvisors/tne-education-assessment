@@ -29,5 +29,6 @@ class UserResponse(BaseModel):
     full_name: str
     role: str
     is_active: bool
+    email_verified: bool
     last_login: datetime | None = None
     created_at: datetime

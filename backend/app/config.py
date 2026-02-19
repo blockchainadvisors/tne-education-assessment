@@ -36,6 +36,18 @@ class Settings(BaseSettings):
     celery_broker_url: str = "redis://localhost:6379/1"
     celery_result_backend: str = "redis://localhost:6379/2"
 
+    # SMTP / Email
+    smtp_host: str = "localhost"
+    smtp_port: int = 1025
+    smtp_use_tls: bool = False
+    smtp_from_email: str = "noreply@tne-assessment.local"
+    smtp_from_name: str = "TNE Assessment Platform"
+    frontend_url: str = "http://localhost:3000"
+
+    # Token expiry
+    email_verify_token_expire_hours: int = 24
+    magic_link_token_expire_minutes: int = 15
+
     # CORS
     cors_origins: list[str] = ["http://localhost:3000", "https://tne.badev.tools", "https://tne-api.badev.tools"]
 

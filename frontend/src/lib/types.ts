@@ -25,6 +25,10 @@ export interface TokenResponse {
   token_type: string;
 }
 
+export interface MessageResponse {
+  message: string;
+}
+
 // --- Tenant ---
 
 export interface Tenant {

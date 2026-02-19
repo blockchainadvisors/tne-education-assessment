@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
-import type { TokenResponse } from "@/lib/types";
+import type { MessageResponse } from "@/lib/types";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -39,13 +39,10 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const data = await apiClient.post<TokenResponse>(
-        "/auth/register",
-        formData
+      await apiClient.post<MessageResponse>("/auth/register", formData);
+      router.push(
+        `/verify-email-sent?email=${encodeURIComponent(formData.email)}`
       );
-
-      apiClient.setTokens(data.access_token, data.refresh_token);
-      router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

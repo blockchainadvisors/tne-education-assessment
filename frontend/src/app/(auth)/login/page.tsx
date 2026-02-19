@@ -4,18 +4,23 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
-import type { TokenResponse } from "@/lib/types";
+import type { MessageResponse, TokenResponse } from "@/lib/types";
+
+type Tab = "password" | "magic-link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [tab, setTab] = useState<Tab>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: FormEvent) {
+  async function handlePasswordLogin(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setMessage("");
     setLoading(true);
 
     try {
@@ -23,14 +28,42 @@ export default function LoginPage() {
         email,
         password,
       });
-
       apiClient.setTokens(data.access_token, data.refresh_token);
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        // Check for email not verified
+        if (err.message.includes("Email not verified")) {
+          setError(
+            "Your email is not verified. Please check your inbox for the verification link."
+          );
+        } else {
+          setError(err.message);
+        }
       } else {
         setError("Login failed. Please check your credentials and try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleMagicLink(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const data = await apiClient.post<MessageResponse>("/auth/magic-link", {
+        email,
+      });
+      setMessage(data.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to send sign-in link. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -54,78 +87,176 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
 
+          {/* Tabs */}
+          <div className="mb-6 flex rounded-lg bg-slate-100 p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setTab("password");
+                setError("");
+                setMessage("");
+              }}
+              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                tab === "password"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Password
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTab("magic-link");
+                setError("");
+                setMessage("");
+              }}
+              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                tab === "magic-link"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Magic Link
+            </button>
+          </div>
+
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="email" className="label">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field mt-1.5"
-                placeholder="you@institution.edu"
-                autoComplete="email"
-              />
+          {message && (
+            <div className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+              {message}
             </div>
+          )}
 
-            <div>
-              <label htmlFor="password" className="label">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field mt-1.5"
-                placeholder="Enter your password"
-                autoComplete="current-password"
-              />
-            </div>
+          {tab === "password" ? (
+            <form onSubmit={handlePasswordLogin} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="label">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-field mt-1.5"
+                  placeholder="you@institution.edu"
+                  autoComplete="email"
+                />
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                "Sign in"
-              )}
-            </button>
-          </form>
+              <div>
+                <label htmlFor="password" className="label">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input-field mt-1.5"
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleMagicLink} className="space-y-5">
+              <div>
+                <label htmlFor="magic-email" className="label">
+                  Email address
+                </label>
+                <input
+                  id="magic-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-field mt-1.5"
+                  placeholder="you@institution.edu"
+                  autoComplete="email"
+                />
+              </div>
+
+              <p className="text-sm text-slate-500">
+                We&apos;ll send a sign-in link to your email. No password
+                needed.
+              </p>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Sending link...
+                  </span>
+                ) : (
+                  "Send sign-in link"
+                )}
+              </button>
+            </form>
+          )}
 
           <p className="mt-6 text-center text-sm text-slate-600">
             Don&apos;t have an account?{" "}

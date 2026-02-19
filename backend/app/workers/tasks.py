@@ -1,10 +1,24 @@
-"""Celery background tasks for AI pipeline operations.
-
-Phase 1: Task stubs.
-Phase 2+: Full implementation with Claude API, scoring, report generation.
-"""
+"""Celery background tasks for AI pipeline operations and email sending."""
 
 from app.workers.celery_app import celery_app
+
+
+@celery_app.task(name="send_verification_email")
+def send_verification_email_task(to_email: str, full_name: str, token: str) -> dict:
+    """Send an email verification email via Celery worker."""
+    from app.services.email_service import send_verification_email
+
+    send_verification_email(to_email, full_name, token)
+    return {"status": "sent", "to": to_email}
+
+
+@celery_app.task(name="send_magic_link_email")
+def send_magic_link_email_task(to_email: str, token: str) -> dict:
+    """Send a magic link email via Celery worker."""
+    from app.services.email_service import send_magic_link_email
+
+    send_magic_link_email(to_email, token)
+    return {"status": "sent", "to": to_email}
 
 
 @celery_app.task(name="process_document")
