@@ -9,10 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import get_tenant, require_role
 from app.models.assessment import Assessment
+from app.models.ai_job import AIJob
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.report import ReportResponse
-from app.services.report_service import create_report_placeholder, get_report
+from app.schemas.ai_job import AIJobResponse
+from app.services.report_service import get_report
 
 router = APIRouter(prefix="/assessments/{assessment_id}/report")
 
@@ -30,14 +32,14 @@ async def get_assessment_report(
     return report
 
 
-@router.post("/generate", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/generate", response_model=AIJobResponse, status_code=status.HTTP_202_ACCEPTED)
 async def generate_report(
     assessment_id: uuid.UUID,
     tenant: Tenant = Depends(get_tenant),
     _user: User = Depends(require_role("platform_admin", "tenant_admin", "reviewer")),
     db: AsyncSession = Depends(get_db),
 ):
-    """Generate a new report for an assessment."""
+    """Trigger AI report generation for an assessment (async via Celery)."""
     # Verify assessment exists and is scored
     result = await db.execute(
         select(Assessment).where(
@@ -54,9 +56,18 @@ async def generate_report(
             detail="Assessment must be scored before generating a report",
         )
 
-    # Phase 1: Create placeholder. Phase 3: Trigger AI report generation via Celery.
-    report = await create_report_placeholder(db, assessment_id)
-    assessment.status = "report_generated"
+    # Create AI job record
+    job = AIJob(
+        assessment_id=assessment_id,
+        job_type="report_generation",
+        status="queued",
+    )
+    db.add(job)
     await db.flush()
 
-    return report
+    # Dispatch Celery task
+    from app.workers.tasks import generate_report as generate_report_task
+
+    generate_report_task.delay(str(assessment_id), str(job.id))
+
+    return job

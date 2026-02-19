@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, tenants, users, assessments, responses, files, scoring, reports, benchmarks, admin
+from app.api.v1 import auth, tenants, users, assessments, responses, files, scoring, reports, benchmarks, admin, jobs
 from app.config import settings
 
 app = FastAPI(
@@ -31,6 +31,7 @@ app.include_router(scoring.router, prefix=prefix, tags=["scoring"])
 app.include_router(reports.router, prefix=prefix, tags=["reports"])
 app.include_router(benchmarks.router, prefix=prefix, tags=["benchmarks"])
 app.include_router(admin.router, prefix=prefix, tags=["admin"])
+app.include_router(jobs.router, prefix=prefix, tags=["jobs"])
 
 
 @app.get("/health")

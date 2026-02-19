@@ -77,7 +77,10 @@ async def upload_file(
     db.add(upload)
     await db.flush()
 
-    # TODO: Phase 2 - trigger document intelligence pipeline via Celery
+    # Trigger document intelligence pipeline via Celery
+    from app.workers.tasks import process_document
+
+    process_document.delay(str(upload.id))
 
     return upload
 

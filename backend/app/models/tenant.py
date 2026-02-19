@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, func
+from sqlalchemy import ForeignKey, String, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -34,7 +34,7 @@ class PartnerInstitution(Base):
     __tablename__ = "partner_institutions"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenants.id"), index=True)
     name: Mapped[str] = mapped_column(String(255))
     country: Mapped[str] = mapped_column(String(100))
     position: Mapped[int] = mapped_column(default=1)

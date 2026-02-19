@@ -12,7 +12,7 @@ class FileUpload(Base):
     __tablename__ = "file_uploads"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenants.id"), index=True)
     assessment_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("assessments.id"), index=True
     )
