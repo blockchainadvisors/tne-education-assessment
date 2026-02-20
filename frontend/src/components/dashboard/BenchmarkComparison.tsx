@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -80,7 +80,7 @@ export function BenchmarkComparison({ data }: BenchmarkComparisonProps) {
       </h3>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+          <LineChart
             data={chartData}
             margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
           >
@@ -104,19 +104,26 @@ export function BenchmarkComparison({ data }: BenchmarkComparisonProps) {
               iconType="circle"
               wrapperStyle={{ fontSize: "12px" }}
             />
-            <Bar
+            <Line
+              type="monotone"
               dataKey="yourScore"
               name="Your Score"
-              fill="var(--brand)"
-              radius={[4, 4, 0, 0]}
+              stroke="var(--brand)"
+              strokeWidth={2}
+              dot={{ r: 5, fill: "var(--brand)", strokeWidth: 0 }}
+              activeDot={{ r: 7 }}
             />
-            <Bar
+            <Line
+              type="monotone"
               dataKey="peerMedian"
               name="Peer Median"
-              fill="#94a3b8"
-              radius={[4, 4, 0, 0]}
+              stroke="#94a3b8"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={{ r: 5, fill: "#94a3b8", strokeWidth: 0 }}
+              activeDot={{ r: 7 }}
             />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>

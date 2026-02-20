@@ -16,7 +16,11 @@ async def score_binary(
     if value is None:
         return None
 
-    answer = value.get("answer") if isinstance(value, dict) else value
+    # Support both {"answer": true} and {"yes": true} formats
+    if isinstance(value, dict):
+        answer = value.get("answer") if "answer" in value else value.get("yes")
+    else:
+        answer = value
     if answer is None:
         return None
 
@@ -25,7 +29,7 @@ async def score_binary(
     rubric_type = rubric.get("type", "") if rubric else ""
 
     if rubric_type == "binary_with_evidence":
-        evidence = value.get("evidence", "") if isinstance(value, dict) else ""
+        evidence = value.get("evidence", "") or value.get("follow_up", "") if isinstance(value, dict) else ""
         if evidence and len(str(evidence)) > 50:
             # Evidence quality based on length/detail (simplified)
             evidence_len = len(str(evidence))

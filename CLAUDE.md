@@ -30,10 +30,26 @@ npm run build                               # Production build
 npm run lint                                # ESLint
 ```
 
+### Dev Mode (PM2)
+```bash
+# Prerequisites: infrastructure services must be running (see Docker below)
+cd infrastructure && docker compose up -d postgres redis minio mailpit
+
+# Start backend + frontend in dev mode with hot-reload
+pm2 start "backend/.venv/bin/uvicorn app.main:app --reload --port 8000" --name backend --cwd /home/neylaur/tne-education-assessment/backend
+pm2 start "npm run dev" --name frontend --cwd /home/neylaur/tne-education-assessment/frontend
+
+pm2 status                                 # Check status
+pm2 logs                                   # Tail all logs
+pm2 logs backend --lines 50                # Backend logs
+pm2 restart backend                        # Restart after changes
+pm2 delete all                             # Stop everything
+```
+
 ### Infrastructure (Docker)
 ```bash
 cd infrastructure
-docker compose up -d postgres redis minio mailpit   # Start deps only
+docker compose up -d postgres redis minio mailpit   # Start deps only (for dev mode)
 docker compose up --build                            # Full stack (production mode)
 docker compose down -v                               # Tear down with volumes
 ```
@@ -88,7 +104,8 @@ BASE_URL=https://tne.badev.tools npx playwright test       # Against deployed
 ### Docker Production
 - `infrastructure/docker-compose.yml` — 7 services: postgres, redis, minio, mailpit, migrate (alembic), backend, celery-worker, frontend
 - `migrate` service runs `alembic upgrade head` before backend starts (uses `service_completed_successfully`)
-- `NEXT_PUBLIC_API_URL` is a build-time arg baked into the JS bundle — must be set correctly at `docker compose build`
+- Frontend proxies `/api/*` to backend via Next.js rewrites (`next.config.ts`) — no CORS issues, no `NEXT_PUBLIC_API_URL` needed
+- `BACKEND_URL` build arg in frontend Dockerfile sets the rewrite destination (defaults to `http://backend:8000`)
 - Backend Dockerfile requires `ENV PYTHONPATH=/app` for module resolution
 - Production domain: `tne.badev.tools` (frontend), `tne-api.badev.tools` (backend API)
 

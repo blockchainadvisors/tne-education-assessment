@@ -8,12 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_tenant, require_role
-from app.models.assessment import Assessment, AssessmentTheme
+from app.models.assessment import Assessment, AssessmentItem, AssessmentResponse, AssessmentTheme
 from app.models.ai_job import AIJob
 from app.models.scoring import ThemeScore
 from app.models.tenant import Tenant
 from app.models.user import User
-from app.schemas.scoring import AssessmentScoresResponse, ThemeScoreResponse
+from app.schemas.scoring import AssessmentScoresResponse, ItemScoreResponse, ThemeScoreResponse
 from app.schemas.ai_job import AIJobResponse
 
 router = APIRouter(prefix="/assessments/{assessment_id}/scores")
@@ -46,12 +46,48 @@ async def get_scores(
             AssessmentTheme.template_id == assessment.template_id
         )
     )
-    themes_by_id = {t.id: t for t in themes_result.scalars().all()}
+    themes = themes_result.scalars().all()
+    themes_by_id = {t.id: t for t in themes}
+
+    # Load items grouped by theme
+    items_result = await db.execute(
+        select(AssessmentItem).where(
+            AssessmentItem.theme_id.in_([t.id for t in themes])
+        )
+    )
+    items = items_result.scalars().all()
+    items_by_id = {i.id: i for i in items}
+    items_by_theme: dict[uuid.UUID, list] = {}
+    for item in items:
+        items_by_theme.setdefault(item.theme_id, []).append(item)
+
+    # Load responses with scores
+    responses_result = await db.execute(
+        select(AssessmentResponse).where(
+            AssessmentResponse.assessment_id == assessment_id
+        )
+    )
+    responses = responses_result.scalars().all()
+    responses_by_item = {r.item_id: r for r in responses}
 
     theme_score_responses = []
     for ts in theme_scores:
         theme = themes_by_id.get(ts.theme_id)
         norm = ts.normalised_score or 0.0
+
+        # Build per-item scores for this theme
+        item_scores = []
+        for item in sorted(items_by_theme.get(ts.theme_id, []), key=lambda i: i.code):
+            resp = responses_by_item.get(item.id)
+            if resp and resp.ai_score is not None:
+                item_scores.append(ItemScoreResponse(
+                    item_code=item.code,
+                    item_label=item.label,
+                    field_type=item.field_type,
+                    ai_score=resp.ai_score,
+                    ai_feedback=resp.ai_feedback,
+                ))
+
         theme_score_responses.append(ThemeScoreResponse(
             theme_id=ts.theme_id,
             theme_name=theme.name if theme else "",
@@ -62,6 +98,7 @@ async def get_scores(
             max_score=100.0,
             percentage=norm,
             ai_analysis=ts.ai_analysis,
+            item_scores=item_scores,
         ))
 
     overall = assessment.overall_score or 0.0

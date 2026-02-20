@@ -20,7 +20,7 @@ async def score_text(
     if value is None:
         return None
 
-    text_value = value.get("value", "") if isinstance(value, dict) else str(value)
+    text_value = value.get("text", "") or value.get("value", "") if isinstance(value, dict) else str(value)
     if not text_value or len(text_value.strip()) < 10:
         return {
             "score": 0.0,

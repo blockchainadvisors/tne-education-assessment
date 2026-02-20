@@ -212,6 +212,14 @@ export interface FileUpload {
 
 // --- Scoring ---
 
+export interface ItemScore {
+  item_code: string;
+  item_label: string;
+  field_type: string;
+  ai_score: number | null;
+  ai_feedback: string | null;
+}
+
 export interface ThemeScore {
   theme_id: string;
   theme_name: string;
@@ -222,7 +230,7 @@ export interface ThemeScore {
   max_score: number;
   percentage: number;
   ai_analysis?: string | null;
-  item_scores: Record<string, number>;
+  item_scores: ItemScore[];
 }
 
 export interface AssessmentScores {

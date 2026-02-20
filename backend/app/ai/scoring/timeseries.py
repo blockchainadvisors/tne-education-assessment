@@ -26,14 +26,23 @@ async def score_timeseries(
 
     # Extract totals per year
     totals = []
-    for year in sorted(years_data.keys()):
-        year_val = years_data[year]
-        if isinstance(year_val, dict):
-            # Gendered data: sum male + female
-            total = sum(v for v in year_val.values() if isinstance(v, (int, float)))
+    if isinstance(years_data, list):
+        # List format: [{"year": 2023, "male": 298, "female": 262, ...}, ...]
+        for entry in sorted(years_data, key=lambda e: e.get("year", 0)):
+            total = sum(
+                v for k, v in entry.items()
+                if k != "year" and isinstance(v, (int, float))
+            )
             totals.append(total)
-        elif isinstance(year_val, (int, float)):
-            totals.append(year_val)
+    else:
+        # Dict format: {"2021": {"male": 100, "female": 120}, ...}
+        for year in sorted(years_data.keys()):
+            year_val = years_data[year]
+            if isinstance(year_val, dict):
+                total = sum(v for v in year_val.values() if isinstance(v, (int, float)))
+                totals.append(total)
+            elif isinstance(year_val, (int, float)):
+                totals.append(year_val)
 
     if len(totals) < 2:
         return {"score": 50.0, "feedback": "Insufficient data points for trend analysis."}
