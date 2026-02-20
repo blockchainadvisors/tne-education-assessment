@@ -44,53 +44,71 @@ class ReportResponse(BaseModel):
             ))
 
         if self.theme_analyses and isinstance(self.theme_analyses, dict):
-            for theme_code, analysis in self.theme_analyses.items():
+            for theme_key, analysis in self.theme_analyses.items():
                 if isinstance(analysis, dict):
-                    content_parts = []
-                    if analysis.get("summary"):
-                        content_parts.append(f"<p>{analysis['summary']}</p>")
-                    if analysis.get("strengths"):
-                        content_parts.append("<h4>Strengths</h4><ul>")
-                        for s in analysis["strengths"]:
-                            content_parts.append(f"<li>{s}</li>")
-                        content_parts.append("</ul>")
-                    if analysis.get("areas_for_improvement"):
-                        content_parts.append("<h4>Areas for Improvement</h4><ul>")
-                        for a in analysis["areas_for_improvement"]:
-                            content_parts.append(f"<li>{a}</li>")
-                        content_parts.append("</ul>")
+                    # Use theme_name from the analysis dict if available,
+                    # otherwise fall back to the key
+                    title = analysis.get("theme_name") or theme_key.replace("-", " ").replace("_", " ").title()
+                    score = analysis.get("score")
+
+                    # The analysis field may be markdown text or structured fields
+                    if analysis.get("analysis"):
+                        content = analysis["analysis"]
+                    else:
+                        content_parts = []
+                        if analysis.get("summary"):
+                            content_parts.append(analysis["summary"])
+                        if analysis.get("strengths"):
+                            content_parts.append("\n### Strengths\n")
+                            for s in analysis["strengths"]:
+                                content_parts.append(f"- {s}")
+                        if analysis.get("areas_for_improvement"):
+                            content_parts.append("\n### Areas for Improvement\n")
+                            for a in analysis["areas_for_improvement"]:
+                                content_parts.append(f"- {a}")
+                        content = "\n".join(content_parts)
+
+                    if score is not None:
+                        title = f"{title} ({score:.1f}/100)"
+
                     sections.append(ReportSection(
-                        title=theme_code.replace("-", " ").replace("_", " ").title(),
-                        content="".join(content_parts),
-                        theme_code=theme_code,
+                        title=title,
+                        content=content,
+                        theme_code=theme_key,
                     ))
                 elif isinstance(analysis, str):
                     sections.append(ReportSection(
-                        title=theme_code.replace("-", " ").replace("_", " ").title(),
-                        content=f"<p>{analysis}</p>",
-                        theme_code=theme_code,
+                        title=theme_key.replace("-", " ").replace("_", " ").title(),
+                        content=analysis,
+                        theme_code=theme_key,
                     ))
 
         if self.improvement_recommendations:
             recs = self.improvement_recommendations
             if isinstance(recs, list):
-                content_parts = ["<ul>"]
-                for rec in recs:
+                content_parts = []
+                for i, rec in enumerate(recs, 1):
                     if isinstance(rec, dict):
+                        title_text = rec.get("title", f"Recommendation {i}")
                         priority = rec.get("priority", "")
-                        text = rec.get("recommendation", str(rec))
-                        timeline = rec.get("timeline", "")
-                        content_parts.append(
-                            f"<li><strong>[{priority.upper()}]</strong> {text}"
-                            + (f" <em>(Timeline: {timeline})</em>" if timeline else "")
-                            + "</li>"
-                        )
+                        rationale = rec.get("rationale", rec.get("recommendation", ""))
+                        timeline = rec.get("suggested_timeline", rec.get("timeline", ""))
+                        themes = rec.get("themes_affected", [])
+                        content_parts.append(f"### {i}. {title_text}")
+                        if priority:
+                            content_parts.append(f"\n**Priority:** {priority}")
+                        if themes:
+                            content_parts.append(f"\n**Themes:** {', '.join(themes) if isinstance(themes, list) else themes}")
+                        if rationale:
+                            content_parts.append(f"\n{rationale}")
+                        if timeline:
+                            content_parts.append(f"\n**Timeline:** {timeline}")
+                        content_parts.append("")
                     else:
-                        content_parts.append(f"<li>{rec}</li>")
-                content_parts.append("</ul>")
+                        content_parts.append(f"- {rec}")
                 sections.append(ReportSection(
                     title="Improvement Recommendations",
-                    content="".join(content_parts),
+                    content="\n".join(content_parts),
                 ))
 
         self.sections = sections

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -8,12 +8,14 @@ import {
   ArrowLeft,
   AlertCircle,
   Download,
+  Loader2,
   ChevronDown,
   ChevronRight,
   Bot,
   CheckCircle2,
   AlertTriangle,
   XCircle,
+  FileText,
 } from "lucide-react";
 import { Spinner, Alert, Badge } from "@/components/ui";
 import { ResponseDisplay } from "@/components/forms/ResponseDisplay";
@@ -147,6 +149,29 @@ export default function AssessmentReviewPage() {
   const assessmentId = params.id as string;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [expandAll, setExpandAll] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handleExportPdf = useCallback(async () => {
+    setPdfLoading(true);
+    try {
+      const token = apiClient.getAccessToken();
+      const res = await fetch(`/api/v1/assessments/${assessmentId}/report/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed to download PDF");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `TNE-Report-${assessmentId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("PDF not available. Generate a report first.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [assessmentId]);
 
   const { data: assessment, isLoading: loadingAssessment } = useQuery({
     queryKey: ["assessment", assessmentId],
@@ -276,19 +301,33 @@ export default function AssessmentReviewPage() {
         </div>
         <div className="flex items-center gap-2">
           {hasScores && (
-            <button
-              onClick={toggleAll}
-              className="btn-secondary text-sm"
-            >
-              {expandAll ? "Collapse All" : "Expand All AI Detail"}
-            </button>
+            <>
+              <button
+                onClick={toggleAll}
+                className="btn-secondary text-sm"
+              >
+                {expandAll ? "Collapse All" : "Expand All AI Detail"}
+              </button>
+              <Link
+                href={`/assessments/${assessmentId}/report`}
+                className="btn-primary text-sm"
+              >
+                <FileText className="mr-1.5 h-4 w-4" />
+                Report
+              </Link>
+            </>
           )}
           <button
             className="btn-secondary"
-            disabled
-            title="PDF export coming soon"
+            disabled={pdfLoading || !hasScores}
+            title={hasScores ? "Download report as PDF" : "Score assessment first"}
+            onClick={handleExportPdf}
           >
-            <Download className="mr-1.5 h-4 w-4" />
+            {pdfLoading ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-1.5 h-4 w-4" />
+            )}
             Export PDF
           </button>
         </div>

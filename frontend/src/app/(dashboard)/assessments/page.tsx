@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Plus, Eye, Pencil, ClipboardList } from "lucide-react";
+import { Plus, Eye, Pencil, FileText } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import type { Assessment } from "@/lib/types";
 import { Spinner, Alert, PageHeader, EmptyState, StatusBadge } from "@/components/ui";
@@ -125,8 +125,18 @@ export default function AssessmentsPage() {
                           className="btn-ghost btn-sm"
                         >
                           <Eye className="mr-1 h-3.5 w-3.5" />
-                          View
+                          Review
                         </Link>
+                        {(assessment.status === "scored" ||
+                          assessment.status === "report_generated") && (
+                          <Link
+                            href={`/assessments/${assessment.id}/report`}
+                            className="btn-ghost btn-sm text-brand-600 hover:bg-brand-50 hover:text-brand-700"
+                          >
+                            <FileText className="mr-1 h-3.5 w-3.5" />
+                            Report
+                          </Link>
+                        )}
                       </div>
                     </td>
                   </tr>

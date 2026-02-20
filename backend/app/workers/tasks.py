@@ -8,7 +8,15 @@ from app.workers.celery_app import celery_app
 
 
 def _run_async(coro):
-    """Run an async coroutine from a sync Celery task."""
+    """Run an async coroutine from a sync Celery task.
+
+    Disposes the engine's connection pool first to avoid 'Future attached to
+    a different loop' errors when Celery reuses a forked worker process across
+    multiple tasks (each calling asyncio.run with a fresh event loop).
+    """
+    from app.database import engine
+
+    engine.sync_engine.dispose(close=False)
     return asyncio.run(coro)
 
 

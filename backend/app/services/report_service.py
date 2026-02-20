@@ -25,6 +25,7 @@ async def get_report(
             Assessment.tenant_id == tenant_id,
         )
         .order_by(AssessmentReport.version.desc())
+        .limit(1)
     )
     return result.scalar_one_or_none()
 
@@ -39,6 +40,7 @@ async def create_report_placeholder(
         select(AssessmentReport)
         .where(AssessmentReport.assessment_id == assessment_id)
         .order_by(AssessmentReport.version.desc())
+        .limit(1)
     )
     existing = result.scalar_one_or_none()
     version = (existing.version + 1) if existing else 1

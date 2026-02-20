@@ -75,6 +75,97 @@ html {
   }
 }
 
+/* Report markdown content — explicit styles to ensure proper rendering
+   even if Tailwind's prose plugin has specificity issues with Preflight */
+.report-markdown h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+.report-markdown h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+.report-markdown h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
+}
+.report-markdown h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+.report-markdown p {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: #475569;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+.report-markdown p:first-child {
+  margin-top: 0;
+}
+.report-markdown strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+.report-markdown em {
+  font-style: italic;
+  color: #64748b;
+}
+.report-markdown ul,
+.report-markdown ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: 1.5em;
+}
+.report-markdown ul {
+  list-style-type: disc;
+}
+.report-markdown ol {
+  list-style-type: decimal;
+}
+.report-markdown li {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+.report-markdown li::marker {
+  color: #94a3b8;
+}
+.report-markdown hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 1.5rem 0;
+}
+.report-markdown a {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+.report-markdown blockquote {
+  border-left: 3px solid #e2e8f0;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #64748b;
+  font-style: italic;
+}
+
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
