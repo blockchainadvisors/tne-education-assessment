@@ -10,11 +10,20 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "TNE Assessment Platform",
+    default: "TNE Assessment Platform | AI-Powered Quality Assurance for Transnational Education",
     template: "%s | TNE Assessment",
   },
   description:
-    "Transnational Education Quality Assessment and Benchmarking Platform",
+    "Elevate transnational education standards with AI-powered quality assessment, automated scoring, peer benchmarking, and comprehensive reporting across 52 items and 5 themes.",
+  keywords: [
+    "transnational education",
+    "quality assurance",
+    "TNE assessment",
+    "AI scoring",
+    "education benchmarking",
+    "higher education",
+    "quality assessment platform",
+  ],
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
