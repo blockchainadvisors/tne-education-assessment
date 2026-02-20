@@ -1,77 +1,29 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import {
-  ClipboardList,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  Plus,
-} from "lucide-react";
-import { apiClient } from "@/lib/api-client";
-import type { Assessment, User } from "@/lib/types";
-import { ScoreOverview } from "@/components/dashboard/ScoreOverview";
+import { Plus, ClipboardList, ChevronDown } from "lucide-react";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { Spinner, PageHeader, EmptyState } from "@/components/ui";
+import { StatusCards } from "@/components/dashboard/StatusCards";
+import { OverallScoreGauge } from "@/components/dashboard/OverallScoreGauge";
+import { ThemeRadialBars } from "@/components/dashboard/ThemeRadialBars";
+import { YearOverYearTrend } from "@/components/dashboard/YearOverYearTrend";
+import { BenchmarkComparison } from "@/components/dashboard/BenchmarkComparison";
+import { RecentAssessmentsTable } from "@/components/dashboard/RecentAssessmentsTable";
+import { RadarChart } from "@/components/dashboard/RadarChart";
 
 export default function DashboardPage() {
-  const { data: user } = useQuery({
-    queryKey: ["user"],
-    queryFn: () => apiClient.get<User>("/users/me"),
-  });
+  const {
+    user,
+    assessments,
+    latestScores,
+    allYearScores,
+    benchmarks,
+    statusCounts,
+    loading,
+  } = useDashboardData();
 
-  const { data: assessments, isLoading } = useQuery({
-    queryKey: ["assessments"],
-    queryFn: () => apiClient.get<Assessment[]>("/assessments"),
-  });
-
-  const items = assessments || [];
-  const draftCount = items.filter((a) => a.status === "draft").length;
-  const inProgressCount = items.filter(
-    (a) => a.status === "in_progress"
-  ).length;
-  const submittedCount = items.filter((a) => a.status === "submitted").length;
-  const scoredCount = items.filter((a) => a.status === "scored").length;
-
-  const scoredAssessment = items.find(
-    (a) => a.status === "scored" || a.status === "published"
-  );
-
-  const statusCards = [
-    {
-      label: "Draft",
-      count: draftCount,
-      icon: ClipboardList,
-      color: "text-slate-600",
-      bg: "bg-slate-100",
-      ring: "ring-slate-200",
-    },
-    {
-      label: "In Progress",
-      count: inProgressCount,
-      icon: Clock,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
-      ring: "ring-amber-200",
-    },
-    {
-      label: "Submitted",
-      count: submittedCount,
-      icon: AlertCircle,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-      ring: "ring-blue-200",
-    },
-    {
-      label: "Scored",
-      count: scoredCount,
-      icon: CheckCircle2,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-      ring: "ring-emerald-200",
-    },
-  ];
+  const hasAssessments = !loading.assessments && assessments.length > 0;
 
   return (
     <div className="space-y-8">
@@ -80,55 +32,21 @@ export default function DashboardPage() {
         description="Here is an overview of your institution's assessment activity."
       />
 
-      {/* Status cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statusCards.map((card) => (
-          <div
-            key={card.label}
-            className={`rounded-xl bg-white p-5 shadow-sm ring-1 ${card.ring}`}
-          >
-            <div className="flex items-center gap-4">
-              <div className={`rounded-lg p-2.5 ${card.bg}`}>
-                <card.icon className={`h-5 w-5 ${card.color}`} />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">{card.label}</p>
-                <p className="text-2xl font-bold text-slate-900">
-                  {isLoading ? (
-                    <span className="inline-block h-7 w-8 animate-pulse rounded bg-slate-200" />
-                  ) : (
-                    card.count
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Row 1: Status Cards */}
+      <StatusCards counts={statusCounts} loading={loading.assessments} />
 
-      {/* Score overview */}
-      {scoredAssessment && (
-        <div>
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <TrendingUp className="h-5 w-5 text-brand-600" />
-            Latest Assessment Score
-          </h2>
-          <ScoreOverview assessmentId={scoredAssessment.id} />
-        </div>
-      )}
-
-      {/* Loading state */}
-      {isLoading && (
+      {/* Loading state for initial load */}
+      {loading.assessments && (
         <div className="flex justify-center py-8">
           <Spinner size="lg" />
         </div>
       )}
 
       {/* Empty state */}
-      {!isLoading && items.length === 0 && (
+      {!loading.assessments && assessments.length === 0 && (
         <div className="card">
           <EmptyState
-            icon={ClipboardList}
+            illustration="/illustrations/empty-assessments.png"
             title="No assessments yet"
             description="Get started by creating your first assessment. Select a template and academic year to begin."
             action={
@@ -139,6 +57,61 @@ export default function DashboardPage() {
             }
           />
         </div>
+      )}
+
+      {/* Row 2: Overall Score Gauge | Theme Radial Bars */}
+      {hasAssessments && latestScores && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <OverallScoreGauge scores={latestScores} />
+          <ThemeRadialBars themeScores={latestScores.theme_scores} />
+        </div>
+      )}
+
+      {/* Skeleton while scores load */}
+      {hasAssessments && loading.scores && !latestScores && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="card flex items-center justify-center py-16">
+            <Spinner />
+          </div>
+          <div className="card flex items-center justify-center py-16">
+            <Spinner />
+          </div>
+        </div>
+      )}
+
+      {/* Row 3: YoY Trend | Benchmark Comparison */}
+      {hasAssessments && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <YearOverYearTrend data={allYearScores} />
+          {benchmarks ? (
+            <BenchmarkComparison data={benchmarks} />
+          ) : loading.benchmarks ? (
+            <div className="card flex items-center justify-center py-16">
+              <Spinner />
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {/* Row 4: Recent Assessments Table */}
+      {(hasAssessments || loading.assessments) && (
+        <RecentAssessmentsTable
+          assessments={assessments}
+          loading={loading.assessments}
+        />
+      )}
+
+      {/* Row 5: Radar Chart (collapsible) */}
+      {latestScores && latestScores.theme_scores.length >= 3 && (
+        <details className="group">
+          <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-slate-700 hover:text-slate-900">
+            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+            Performance Radar
+          </summary>
+          <div className="card mt-3">
+            <RadarChart themeScores={latestScores.theme_scores} />
+          </div>
+        </details>
       )}
     </div>
   );
