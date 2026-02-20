@@ -33,7 +33,7 @@ base.describe('Error Handling - Verification & Magic Link', () => {
     await baseExpect(heading).toBeVisible({ timeout: 15000 });
 
     // Should display specific message about missing token
-    const errorMessage = page.getByText('No verification token provided');
+    const errorMessage = page.getByText('No verification token provided.');
     await baseExpect(errorMessage).toBeVisible();
   });
 
@@ -87,7 +87,7 @@ base.describe('Error Handling - Authorization', () => {
     // Now register a completely separate tenant/user for cross-tenant testing
     const ts = Date.now();
     const regData = {
-      email: `cross-tenant-${ts}@test.local`,
+      email: `cross-tenant-${ts}@example.com`,
       password: 'TestPass123!',
       full_name: `Cross Tenant User ${ts}`,
       tenant_name: `Cross Tenant ${ts}`,
@@ -149,7 +149,7 @@ base.describe('Error Handling - Registration Edge Cases', () => {
     const ts = Date.now();
     const response = await api.rawRequest('POST', '/auth/register', {
       body: {
-        email: `slug-dup-${ts}@test.local`,
+        email: `slug-dup-${ts}@example.com`,
         password: 'TestPass123!',
         full_name: `Slug Dup User ${ts}`,
         tenant_name: `Slug Dup Tenant ${ts}`,

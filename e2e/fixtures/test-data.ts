@@ -63,7 +63,7 @@ export function freshRegistration() {
   const ts = Date.now();
   return {
     full_name: `Test User ${ts}`,
-    email: `testuser-${ts}@e2e-test.local`,
+    email: `testuser-${ts}@example.com`,
     password: "SecurePass123!",
     tenant_name: `Test Org ${ts}`,
     tenant_slug: `test-org-${ts}`,

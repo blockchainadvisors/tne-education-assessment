@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.dependencies import get_current_user, get_tenant, require_role
@@ -19,9 +20,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     """Get the current authenticated user's profile."""
-    return current_user
+    # Eagerly load tenant so UserResponse.tenant is populated
+    result = await db.execute(
+        select(User).where(User.id == current_user.id).options(selectinload(User.tenant))
+    )
+    return result.scalar_one()
 
 
 @router.get("", response_model=list[UserResponse])

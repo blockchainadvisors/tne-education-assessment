@@ -1,3 +1,5 @@
+"use client";
+
 const variantStyles: Record<string, string> = {
   default: "bg-slate-100 text-slate-700",
   brand: "bg-brand-100 text-brand-700",

@@ -32,28 +32,42 @@ function clearTokens(): void {
   localStorage.removeItem("refresh_token");
 }
 
+// Mutex: if multiple requests get 401 concurrently, only one refresh runs
+let refreshPromise: Promise<boolean> | null = null;
+
 async function refreshAccessToken(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
+  // If a refresh is already in flight, wait for it instead of starting another
+  if (refreshPromise) return refreshPromise;
 
-  try {
-    const response = await fetch(`${BASE_URL}/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
+  refreshPromise = (async () => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) return false;
 
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      if (!response.ok) {
+        clearTokens();
+        return false;
+      }
+
+      const data = await response.json();
+      setTokens(data.access_token, data.refresh_token);
+      return true;
+    } catch {
       clearTokens();
       return false;
     }
+  })();
 
-    const data = await response.json();
-    setTokens(data.access_token, data.refresh_token);
-    return true;
-  } catch {
-    clearTokens();
-    return false;
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
   }
 }
 

@@ -39,7 +39,7 @@ export function useAssessment(assessmentId: string): UseAssessmentResult {
     queryKey: ["template", assessment?.template_id],
     queryFn: () =>
       apiClient.get<AssessmentTemplate>(
-        `/templates/${assessment!.template_id}`
+        `/assessments/templates/${assessment!.template_id}`
       ),
     enabled: !!assessment?.template_id,
   });

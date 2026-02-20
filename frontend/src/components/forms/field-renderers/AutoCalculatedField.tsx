@@ -14,7 +14,7 @@ interface Props {
 export function AutoCalculatedField({ item, value, id }: Props) {
   const displayValue =
     value !== undefined && value !== null && value !== ""
-      ? String(value)
+      ? typeof value === "object" ? JSON.stringify(value) : String(value)
       : "--";
 
   return (

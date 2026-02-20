@@ -18,7 +18,7 @@ export default function NewAssessmentPage() {
 
   const { data: templates, isLoading: loadingTemplates } = useQuery({
     queryKey: ["templates"],
-    queryFn: () => apiClient.get<AssessmentTemplate[]>("/templates"),
+    queryFn: () => apiClient.get<AssessmentTemplate[]>("/assessments/templates"),
   });
 
   async function handleSubmit(e: FormEvent) {

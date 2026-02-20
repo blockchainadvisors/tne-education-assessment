@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function LongTextField({ item, value, onChange, disabled, id }: Props) {
-  const stringValue = (value as string) || "";
+  const stringValue = typeof value === "string" ? value : value != null ? String(value) : "";
   const maxLength = item.validation?.max_length || 2000;
 
   return (

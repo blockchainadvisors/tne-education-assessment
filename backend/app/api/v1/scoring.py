@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_tenant, require_role
-from app.models.assessment import Assessment
+from app.models.assessment import Assessment, AssessmentTheme
 from app.models.ai_job import AIJob
 from app.models.scoring import ThemeScore
 from app.models.tenant import Tenant
@@ -40,10 +40,38 @@ async def get_scores(
     )
     theme_scores = scores_result.scalars().all()
 
+    # Load theme metadata for names/slugs
+    themes_result = await db.execute(
+        select(AssessmentTheme).where(
+            AssessmentTheme.template_id == assessment.template_id
+        )
+    )
+    themes_by_id = {t.id: t for t in themes_result.scalars().all()}
+
+    theme_score_responses = []
+    for ts in theme_scores:
+        theme = themes_by_id.get(ts.theme_id)
+        norm = ts.normalised_score or 0.0
+        theme_score_responses.append(ThemeScoreResponse(
+            theme_id=ts.theme_id,
+            theme_name=theme.name if theme else "",
+            theme_code=theme.slug if theme else "",
+            normalised_score=ts.normalised_score,
+            weighted_score=ts.weighted_score,
+            score=norm,
+            max_score=100.0,
+            percentage=norm,
+            ai_analysis=ts.ai_analysis,
+        ))
+
+    overall = assessment.overall_score or 0.0
+
     return AssessmentScoresResponse(
         assessment_id=assessment_id,
-        overall_score=assessment.overall_score,
-        theme_scores=[ThemeScoreResponse.model_validate(ts) for ts in theme_scores],
+        overall_score=overall,
+        overall_max_score=100.0,
+        overall_percentage=overall,
+        theme_scores=theme_score_responses,
     )
 
 

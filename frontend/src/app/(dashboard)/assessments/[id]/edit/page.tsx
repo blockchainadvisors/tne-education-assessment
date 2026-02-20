@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Save,
   CheckCircle2,
   Send,
@@ -41,12 +43,25 @@ export default function AssessmentEditPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
-  // Build a map of item_id -> value from saved responses + pending changes
+  // Build a map of item_id -> value from saved responses + pending changes.
+  // Backend stores values wrapped in JSON objects like { value: X }, { text: X },
+  // { selected: [...] }, { years: [...] }, etc. Unwrap simple wrappers so
+  // renderers receive primitives; leave structured objects as-is.
   const responseMap = useMemo(() => {
     const map: Record<string, unknown> = {};
     if (responses) {
       responses.forEach((r: AssessmentResponse) => {
-        map[r.item_id] = r.value;
+        const v = r.value;
+        if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+          const obj = v as Record<string, unknown>;
+          const keys = Object.keys(obj);
+          // Unwrap { value: X } or { text: X } single-key wrappers
+          if (keys.length === 1 && (keys[0] === "value" || keys[0] === "text")) {
+            map[r.item_id] = obj[keys[0]];
+            return;
+          }
+        }
+        map[r.item_id] = v;
       });
     }
     return { ...map, ...pendingChanges };
@@ -58,11 +73,11 @@ export default function AssessmentEditPage() {
       if (Object.keys(changes).length === 0) return;
       setSaveStatus("saving");
       try {
-        const payload = Object.entries(changes).map(([itemId, value]) => ({
+        const responses = Object.entries(changes).map(([itemId, value]) => ({
           item_id: itemId,
-          value,
+          value: typeof value === "object" && value !== null ? value : { value },
         }));
-        await apiClient.put(`/assessments/${assessmentId}/responses`, payload);
+        await apiClient.put(`/assessments/${assessmentId}/responses`, { responses });
         setPendingChanges({});
         setSaveStatus("saved");
         refetch();
@@ -154,59 +169,27 @@ export default function AssessmentEditPage() {
             {template.name} - {assessment.academic_year}
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Save status indicator */}
-          <span className="flex items-center gap-1.5 text-sm">
-            {saveStatus === "saving" && (
-              <>
-                <Spinner size="sm" className="text-slate-400" />
-                <span className="text-slate-500">Saving...</span>
-              </>
-            )}
-            {saveStatus === "saved" && (
-              <>
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span className="text-emerald-600">Saved</span>
-              </>
-            )}
-            {saveStatus === "error" && (
-              <>
-                <AlertCircle className="h-4 w-4 text-red-500" />
-                <span className="text-red-600">Save failed</span>
-              </>
-            )}
-          </span>
-
-          <button
-            onClick={() => saveChanges(pendingChanges)}
-            disabled={
-              Object.keys(pendingChanges).length === 0 ||
-              saveStatus === "saving"
-            }
-            className="btn-secondary"
-          >
-            <Save className="mr-1.5 h-4 w-4" />
-            Save
-          </button>
-
-          <button
-            onClick={() => setShowSubmitConfirm(true)}
-            disabled={submitting}
-            className="btn-primary"
-          >
-            {submitting ? (
-              <span className="flex items-center gap-2">
-                <Spinner size="sm" className="text-white" />
-                Submitting...
-              </span>
-            ) : (
-              <>
-                <Send className="mr-1.5 h-4 w-4" />
-                Submit
-              </>
-            )}
-          </button>
-        </div>
+        {/* Save status indicator */}
+        <span className="flex items-center gap-1.5 text-sm">
+          {saveStatus === "saving" && (
+            <>
+              <Spinner size="sm" className="text-slate-400" />
+              <span className="text-slate-500">Saving...</span>
+            </>
+          )}
+          {saveStatus === "saved" && (
+            <>
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <span className="text-emerald-600">Saved</span>
+            </>
+          )}
+          {saveStatus === "error" && (
+            <>
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <span className="text-red-600">Save failed</span>
+            </>
+          )}
+        </span>
       </div>
 
       {/* Progress bar */}
@@ -296,12 +279,73 @@ export default function AssessmentEditPage() {
               theme={activeTheme}
               responseMap={responseMap}
               onFieldChange={handleFieldChange}
-              disabled={
-                assessment.status !== "draft" &&
-                assessment.status !== "in_progress"
-              }
+              disabled={assessment.status !== "draft"}
             />
           )}
+
+          {/* Section navigation */}
+          <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-6">
+            <div>
+              {activeThemeIndex > 0 && (
+                <button
+                  onClick={() => {
+                    setActiveThemeIndex(activeThemeIndex - 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="btn-secondary"
+                >
+                  <ChevronLeft className="mr-1.5 h-4 w-4" />
+                  Previous
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {activeThemeIndex < themes.length - 1 ? (
+                <button
+                  onClick={() => {
+                    setActiveThemeIndex(activeThemeIndex + 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="btn-primary"
+                >
+                  Next
+                  <ChevronRight className="ml-1.5 h-4 w-4" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => saveChanges(pendingChanges)}
+                    disabled={
+                      Object.keys(pendingChanges).length === 0 ||
+                      saveStatus === "saving"
+                    }
+                    className="btn-secondary"
+                  >
+                    <Save className="mr-1.5 h-4 w-4" />
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setShowSubmitConfirm(true)}
+                    disabled={submitting}
+                    className="btn-primary"
+                  >
+                    {submitting ? (
+                      <span className="flex items-center gap-2">
+                        <Spinner size="sm" className="text-white" />
+                        Submitting...
+                      </span>
+                    ) : (
+                      <>
+                        <Send className="mr-1.5 h-4 w-4" />
+                        Submit Assessment
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

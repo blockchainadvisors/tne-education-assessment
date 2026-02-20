@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function DropdownField({ item, value, onChange, disabled, id }: Props) {
-  const stringValue = (value as string) || "";
+  const stringValue = typeof value === "string" ? value : value != null ? String(value) : "";
 
   return (
     <select

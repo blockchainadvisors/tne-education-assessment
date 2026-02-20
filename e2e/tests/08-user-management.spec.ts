@@ -37,7 +37,7 @@ test.describe('User Management', () => {
   test('create new assessor user', async () => {
     const ts = Date.now();
     const userData = {
-      email: `e2e-new-assessor-${ts}@test.local`,
+      email: `e2e-new-assessor-${ts}@example.com`,
       password: 'TestPass123!',
       full_name: `New Assessor ${ts}`,
       role: 'assessor',
@@ -54,7 +54,7 @@ test.describe('User Management', () => {
   test('create new reviewer user', async () => {
     const ts = Date.now();
     const userData = {
-      email: `e2e-new-reviewer-${ts}@test.local`,
+      email: `e2e-new-reviewer-${ts}@example.com`,
       password: 'TestPass123!',
       full_name: `New Reviewer ${ts}`,
       role: 'reviewer',
@@ -73,7 +73,7 @@ test.describe('User Management', () => {
 
     // Create a user with assessor role
     const created = await api.createUser(adminToken, {
-      email: `e2e-role-change-${ts}@test.local`,
+      email: `e2e-role-change-${ts}@example.com`,
       password: 'TestPass123!',
       full_name: `Role Change User ${ts}`,
       role: 'assessor',
@@ -121,7 +121,7 @@ test.describe('User Management', () => {
     const createResponse = await api.rawRequest('POST', '/users', {
       token: assessorToken,
       body: {
-        email: `unauthorized-${Date.now()}@test.local`,
+        email: `unauthorized-${Date.now()}@example.com`,
         password: 'TestPass123!',
         full_name: 'Unauthorized User',
         role: 'assessor',

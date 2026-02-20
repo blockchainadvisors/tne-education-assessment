@@ -11,7 +11,8 @@ interface Props {
 }
 
 export function NumericField({ item, value, onChange, disabled, id }: Props) {
-  const numValue = value !== undefined && value !== null && value !== "" ? Number(value) : "";
+  const parsed = value !== undefined && value !== null && value !== "" ? Number(value) : NaN;
+  const numValue = Number.isNaN(parsed) ? "" : parsed;
 
   return (
     <input

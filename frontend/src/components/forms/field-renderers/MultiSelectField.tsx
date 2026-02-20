@@ -11,7 +11,11 @@ interface Props {
 }
 
 export function MultiSelectField({ item, value, onChange, disabled, id }: Props) {
-  const selectedValues: string[] = Array.isArray(value) ? value : [];
+  // Backend may store as { selected: [...] } — unwrap if needed
+  const raw = value !== null && typeof value === "object" && !Array.isArray(value) && "selected" in (value as Record<string, unknown>)
+    ? (value as Record<string, unknown>).selected
+    : value;
+  const selectedValues: string[] = Array.isArray(raw) ? raw : [];
 
   function handleToggle(optionValue: string) {
     if (selectedValues.includes(optionValue)) {

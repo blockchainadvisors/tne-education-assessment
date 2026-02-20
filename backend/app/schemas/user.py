@@ -20,6 +20,14 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class TenantBrief(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    slug: str
+
+
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -32,3 +40,5 @@ class UserResponse(BaseModel):
     email_verified: bool
     last_login: datetime | None = None
     created_at: datetime
+    updated_at: datetime | None = None
+    tenant: TenantBrief | None = None

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, AlertCircle, Download } from "lucide-react";
 import { Spinner, Alert, Badge } from "@/components/ui";
+import { ResponseDisplay } from "@/components/forms/ResponseDisplay";
 import { apiClient } from "@/lib/api-client";
 import type {
   Assessment,
@@ -26,7 +27,7 @@ export default function AssessmentReviewPage() {
     queryKey: ["template", assessment?.template_id],
     queryFn: () =>
       apiClient.get<AssessmentTemplate>(
-        `/templates/${assessment!.template_id}`
+        `/assessments/templates/${assessment!.template_id}`
       ),
     enabled: !!assessment?.template_id,
   });
@@ -45,7 +46,7 @@ export default function AssessmentReviewPage() {
       apiClient.get<AssessmentScores>(
         `/assessments/${assessmentId}/scores`
       ),
-    enabled: assessment?.status === "scored" || assessment?.status === "published",
+    enabled: assessment?.status === "scored" || assessment?.status === "report_generated",
   });
 
   const isLoading = loadingAssessment || loadingTemplate;
@@ -72,9 +73,21 @@ export default function AssessmentReviewPage() {
     );
   }
 
+  // Build response map — unwrap simple { value: X } / { text: X } wrappers
+  // but keep structured objects (multi_select, multi_year_gender, etc.) intact
+  // for ResponseDisplay to render properly.
   const responseMap: Record<string, unknown> = {};
   responses?.forEach((r) => {
-    responseMap[r.item_id] = r.value;
+    const v = r.value;
+    if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+      const obj = v as Record<string, unknown>;
+      const keys = Object.keys(obj);
+      if (keys.length === 1 && (keys[0] === "value" || keys[0] === "text")) {
+        responseMap[r.item_id] = obj[keys[0]];
+        return;
+      }
+    }
+    responseMap[r.item_id] = v;
   });
 
   return (
@@ -168,20 +181,8 @@ export default function AssessmentReviewPage() {
                       {item.field_type.replace(/_/g, " ")}
                     </Badge>
                   </div>
-                  <div className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    {value !== undefined && value !== null && value !== "" ? (
-                      typeof value === "object" ? (
-                        <pre className="whitespace-pre-wrap text-xs">
-                          {JSON.stringify(value, null, 2)}
-                        </pre>
-                      ) : (
-                        String(value)
-                      )
-                    ) : (
-                      <span className="italic text-slate-400">
-                        No response
-                      </span>
-                    )}
+                  <div className="mt-3 rounded-md bg-slate-50 px-3 py-2.5">
+                    <ResponseDisplay item={item} value={value} />
                   </div>
                 </div>
               );

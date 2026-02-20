@@ -37,6 +37,7 @@ class TenantResponse(BaseModel):
     settings: dict | None = None
     is_active: bool
     created_at: datetime
+    updated_at: datetime | None = None
 
 
 # ---------------------------------------------------------------------------

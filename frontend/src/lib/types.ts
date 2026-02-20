@@ -37,14 +37,16 @@ export interface Tenant {
   slug: string;
   country: string;
   institution_type?: string;
+  subscription_tier?: string;
+  settings?: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 // --- User ---
 
-export type UserRole = "super_admin" | "tenant_admin" | "assessor" | "reviewer" | "viewer";
+export type UserRole = "platform_admin" | "tenant_admin" | "assessor" | "reviewer" | "institution_user";
 
 export interface User {
   id: string;
@@ -54,8 +56,10 @@ export interface User {
   tenant_id: string;
   tenant?: Tenant;
   is_active: boolean;
+  email_verified?: boolean;
+  last_login?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 // --- Partner ---
@@ -65,11 +69,9 @@ export interface Partner {
   tenant_id: string;
   name: string;
   country: string;
-  institution_type?: string;
-  partnership_start_date?: string;
+  position: number;
   is_active: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 // --- Assessment Template ---
@@ -107,37 +109,46 @@ export interface ItemValidation {
 export interface SubField {
   key: string;
   label: string;
-  field_type: FieldType;
+  field_type: FieldType | string;
   options?: ItemOption[];
   validation?: ItemValidation;
+  currencies?: string[];
 }
 
 export interface Item {
   id: string;
-  theme_id: string;
+  theme_id?: string;
   code: string;
   label: string;
   description?: string;
   help_text?: string;
   field_type: FieldType;
+  field_config?: Record<string, unknown>;
   options?: ItemOption[];
   validation?: ItemValidation;
   sub_fields?: SubField[];
   calculation_formula?: string;
-  depends_on?: string[];
+  depends_on?: string | string[];
   order: number;
+  display_order?: number;
+  is_required?: boolean;
   is_scoreable: boolean;
+  weight?: number;
   max_score?: number;
-  scoring_criteria?: Record<string, number>;
+  scoring_criteria?: Record<string, unknown>;
+  scoring_rubric?: Record<string, unknown>;
 }
 
 export interface Theme {
   id: string;
-  template_id: string;
+  template_id?: string;
   name: string;
   code: string;
+  slug?: string;
   description?: string;
+  weight?: number;
   order: number;
+  display_order?: number;
   max_score?: number;
   items: Item[];
 }
@@ -149,19 +160,17 @@ export interface AssessmentTemplate {
   description?: string;
   is_active: boolean;
   themes: Theme[];
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
 }
 
 // --- Assessment ---
 
 export type AssessmentStatus =
   | "draft"
-  | "in_progress"
   | "submitted"
   | "under_review"
   | "scored"
-  | "published";
+  | "report_generated";
 
 export interface Assessment {
   id: string;
@@ -170,10 +179,8 @@ export interface Assessment {
   template?: AssessmentTemplate;
   academic_year: string;
   status: AssessmentStatus;
-  overall_score?: number;
-  submitted_at?: string;
-  scored_at?: string;
-  created_by: string;
+  overall_score?: number | null;
+  submitted_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -182,10 +189,11 @@ export interface AssessmentResponse {
   id: string;
   assessment_id: string;
   item_id: string;
-  item_code: string;
+  partner_id?: string | null;
   value: unknown;
-  is_valid: boolean;
-  validation_errors?: string[];
+  ai_score?: number | null;
+  ai_feedback?: string | null;
+  created_at?: string;
   updated_at: string;
 }
 
@@ -193,14 +201,13 @@ export interface AssessmentResponse {
 
 export interface FileUpload {
   id: string;
-  assessment_id: string;
-  item_id: string;
-  filename: string;
-  file_type: string;
+  original_filename: string;
+  content_type: string;
   file_size: number;
-  storage_path: string;
-  uploaded_by: string;
-  uploaded_at: string;
+  document_type?: string | null;
+  extraction_status?: string;
+  extracted_data?: Record<string, unknown> | null;
+  created_at: string;
 }
 
 // --- Scoring ---
@@ -209,19 +216,22 @@ export interface ThemeScore {
   theme_id: string;
   theme_name: string;
   theme_code: string;
-  score: number;
+  normalised_score?: number | null;
+  weighted_score?: number | null;
+  score: number | null;
   max_score: number;
   percentage: number;
+  ai_analysis?: string | null;
   item_scores: Record<string, number>;
 }
 
 export interface AssessmentScores {
   assessment_id: string;
-  overall_score: number;
+  overall_score: number | null;
   overall_max_score: number;
   overall_percentage: number;
   theme_scores: ThemeScore[];
-  scored_at: string;
+  scored_at?: string | null;
 }
 
 // --- Reports ---
@@ -235,50 +245,53 @@ export interface ReportSection {
 export interface Report {
   id: string;
   assessment_id: string;
-  report_type: "self_assessment" | "benchmark" | "improvement_plan";
+  version: number;
+  report_type: string;
   title: string;
+  executive_summary?: string | null;
+  theme_analyses?: Record<string, unknown> | null;
+  improvement_recommendations?: unknown;
   sections: ReportSection[];
   generated_at: string;
   generated_by: string;
+  pdf_storage_key?: string | null;
 }
 
 // --- Benchmarks ---
 
 export interface BenchmarkMetric {
   metric_name: string;
-  metric_code: string;
-  tenant_value: number;
-  peer_mean: number;
-  peer_median: number;
-  peer_min: number;
-  peer_max: number;
-  percentile_rank: number;
-  z_score: number;
+  percentile_10?: number | null;
+  percentile_25?: number | null;
+  percentile_50?: number | null;
+  percentile_75?: number | null;
+  percentile_90?: number | null;
+  sample_size: number;
+  institution_value?: number | null;
 }
 
 export interface BenchmarkComparison {
-  assessment_id: string;
-  peer_group_size: number;
-  peer_group_criteria: Record<string, string>;
+  academic_year: string;
+  country?: string | null;
   metrics: BenchmarkMetric[];
-  generated_at: string;
 }
 
 // --- AI Jobs ---
 
-export type AIJobStatus = "pending" | "processing" | "completed" | "failed";
-export type AIJobType = "score_assessment" | "generate_report" | "generate_benchmark";
+export type AIJobStatus = "queued" | "processing" | "completed" | "failed";
+export type AIJobType = "scoring" | "report_generation" | "document_extraction" | "risk_prediction";
 
 export interface AIJob {
   id: string;
   assessment_id: string;
   job_type: AIJobType;
   status: AIJobStatus;
-  result?: unknown;
-  error_message?: string;
+  progress: number;
+  result_data?: Record<string, unknown> | null;
+  error_message?: string | null;
   created_at: string;
-  started_at?: string;
-  completed_at?: string;
+  started_at?: string | null;
+  completed_at?: string | null;
 }
 
 // --- API Response Wrappers ---
