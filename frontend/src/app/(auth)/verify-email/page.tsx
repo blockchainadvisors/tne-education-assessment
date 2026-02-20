@@ -6,7 +6,7 @@ import Link from "next/link";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import type { TokenResponse } from "@/lib/types";
-import { Spinner } from "@/components/ui";
+import { Spinner, Logo } from "@/components/ui";
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -97,10 +97,8 @@ export default function VerifyEmailPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-blue-50 px-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            TNE Assessment
-          </h1>
+        <div className="mb-8 flex flex-col items-center gap-4">
+          <Logo variant="full" colorScheme="color" size="lg" />
         </div>
 
         <Suspense

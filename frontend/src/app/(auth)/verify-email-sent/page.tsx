@@ -3,9 +3,10 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { apiClient } from "@/lib/api-client";
 import type { MessageResponse } from "@/lib/types";
-import { Spinner, Alert } from "@/components/ui";
+import { Spinner, Alert, Logo } from "@/components/ui";
 
 function VerifyEmailSentContent() {
   const searchParams = useSearchParams();
@@ -40,19 +41,13 @@ function VerifyEmailSentContent() {
   return (
     <div className="card text-center">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-100">
-        <svg
-          className="h-8 w-8 text-brand-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-          />
-        </svg>
+        <Image
+          src="/illustrations/auth-email-sent.png"
+          alt=""
+          width={40}
+          height={40}
+          className="h-10 w-10 object-contain"
+        />
       </div>
 
       <h2 className="mb-2 text-xl font-semibold text-slate-900">
@@ -116,10 +111,16 @@ export default function VerifyEmailSentPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-blue-50 px-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            TNE Assessment
-          </h1>
+        <div className="mb-8 flex flex-col items-center gap-4">
+          <Image
+            src="/illustrations/auth-email-sent.png"
+            alt=""
+            width={200}
+            height={200}
+            className="h-auto w-48"
+            priority
+          />
+          <Logo variant="full" colorScheme="color" size="lg" />
         </div>
 
         <Suspense

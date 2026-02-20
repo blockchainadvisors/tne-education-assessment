@@ -3,9 +3,10 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { apiClient } from "@/lib/api-client";
 import type { MessageResponse, TokenResponse } from "@/lib/types";
-import { Spinner, Alert } from "@/components/ui";
+import { Spinner, Alert, Logo } from "@/components/ui";
 
 type Tab = "password" | "magic-link";
 
@@ -74,11 +75,17 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-blue-50 px-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            TNE Assessment
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
+        <div className="mb-8 flex flex-col items-center gap-4">
+          <Image
+            src="/illustrations/auth-login.png"
+            alt=""
+            width={200}
+            height={200}
+            className="h-auto w-48"
+            priority
+          />
+          <Logo variant="full" colorScheme="color" size="lg" />
+          <p className="text-sm text-slate-600">
             Transnational Education Quality Assessment Platform
           </p>
         </div>

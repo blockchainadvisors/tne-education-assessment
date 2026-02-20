@@ -53,7 +53,7 @@ export default function AssessmentsPage() {
       {assessments && assessments.length === 0 && (
         <div className="card">
           <EmptyState
-            icon={ClipboardList}
+            illustration="/illustrations/empty-assessments.png"
             title="No assessments found"
             description="Create your first assessment to get started."
             action={
@@ -111,8 +111,7 @@ export default function AssessmentsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {(assessment.status === "draft" ||
-                          assessment.status === "in_progress") && (
+                        {assessment.status === "draft" && (
                           <Link
                             href={`/assessments/${assessment.id}/edit`}
                             className="btn-ghost btn-sm text-brand-600 hover:bg-brand-50 hover:text-brand-700"

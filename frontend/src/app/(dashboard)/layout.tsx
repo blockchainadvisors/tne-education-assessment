@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import type { User } from "@/lib/types";
-import { Spinner, Badge } from "@/components/ui";
+import { Spinner, Badge, Logo } from "@/components/ui";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -97,13 +97,8 @@ export default function DashboardLayout({
         aria-label="Navigation sidebar"
       >
         <div className="flex h-16 items-center justify-between px-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-              T
-            </div>
-            <span className="text-lg font-semibold text-white">
-              TNE Assess
-            </span>
+          <Link href="/dashboard">
+            <Logo variant="full" colorScheme="white" size="md" />
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -128,7 +123,7 @@ export default function DashboardLayout({
           {navigation
             .filter((item) => {
               if (item.href === "/admin") {
-                return user?.role === "super_admin" || user?.role === "tenant_admin";
+                return user?.role === "platform_admin" || user?.role === "tenant_admin";
               }
               return true;
             })
