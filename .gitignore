@@ -42,6 +42,12 @@ docker-compose.override.yml
 .coverage
 htmlcov/
 .pytest_cache/
+e2e/screenshots/
+e2e/test-results/
+
+# MCP
+.mcp.json
+docs/.excalidraw/
 
 # MinIO data
 miniodata/
